@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app>
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>DynaTable.html</welcome-file>
+	</welcome-file-list>
+
+	<!-- Servlets -->
+	<servlet>
+		<servlet-name>calendar</servlet-name>
+		<servlet-class>com.google.gwt.sample.dynatable.server.SchoolCalendarServiceImpl
+		</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>calendar</servlet-name>
+		<url-pattern>/dynatable/calendar</url-pattern>
+	</servlet-mapping>
+	<servlet>
+		<servlet-name>ChannelServlet</servlet-name>
+		<servlet-class>com.google.gwt.sample.dynatable.server.ChannelServiceImpl
+		</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>ChannelServlet</servlet-name>
+		<url-pattern>/dynatable/channel</url-pattern>
+	</servlet-mapping>
+
+</web-app>
