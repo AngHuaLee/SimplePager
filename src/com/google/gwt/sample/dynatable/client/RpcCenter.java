@@ -11,6 +11,10 @@ import com.google.gwt.sample.dynatable.client.event.GetPeoplesListEvent;
 import com.google.gwt.sample.dynatable.client.event.GetPeoplesListHandler;
 import com.google.gwt.sample.dynatable.client.event.GetPeoplesListTestEvent;
 import com.google.gwt.sample.dynatable.client.event.GetPeoplesListTestHandler;
+import com.google.gwt.sample.dynatable.client.event.GetPersonCountEvent;
+import com.google.gwt.sample.dynatable.client.event.GetPersonCountHandler;
+import com.google.gwt.sample.dynatable.client.event.GetTokenEvent;
+import com.google.gwt.sample.dynatable.client.event.GetTokenHandler;
 
 import dontCare.gf.gae.gwtChannel.client.Channel;
 import dontCare.gf.gae.gwtChannel.client.ChannelServiceAsync;
@@ -24,16 +28,24 @@ public class RpcCenter {
 	public static void fireEvent(GwtEvent<? extends EventHandler> event) {
 		eventBus.fireEvent(event);
 	}
-	
+
 	public static HandlerRegistration addGetPeoplesHandler(GetPeoplesHandler h) {
 		return eventBus.addHandler(GetPeoplesEvent.TYPE, h);
 	}
-
+	
 	public static HandlerRegistration addGetPeoplesListHandler(GetPeoplesListHandler h) {
 		return eventBus.addHandler(GetPeoplesListEvent.TYPE, h);
 	}
 
 	public static HandlerRegistration addGetPeoplesListTestHandler(GetPeoplesListTestHandler h) {
 		return eventBus.addHandler(GetPeoplesListTestEvent.TYPE, h);
+	}
+
+	public static HandlerRegistration addGetPersonCountHandler(GetPersonCountHandler h) {
+		return eventBus.addHandler(GetPersonCountEvent.TYPE, h);
+	}
+
+	public static HandlerRegistration addGetTokenHandler(GetTokenHandler h) {
+		return eventBus.addHandler(GetTokenEvent.TYPE, h);
 	}
 }

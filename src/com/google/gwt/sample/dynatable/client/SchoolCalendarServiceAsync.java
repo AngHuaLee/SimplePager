@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.sample.dynatable.shared.vo.Person;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryResult;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 
 /**
@@ -26,9 +28,10 @@ import com.google.gwt.user.client.rpc.AsyncCallback;
  * information for clients that will be calling asynchronously.
  */
 public interface SchoolCalendarServiceAsync {
+	void getPersonCount(AsyncCallback<Integer> callback);
 
-	void getPeoples(int startIndex, int visibleRange,
-			AsyncCallback<Person[]> callback);
+	void getPeoples(OfyQueryParameter<Person> para,
+			AsyncCallback<OfyQueryResult<List<Person>>> callback);
 
 	void getPeoplesList(int startIndex, int visibleRange,
 			AsyncCallback<List<Person>> callback);

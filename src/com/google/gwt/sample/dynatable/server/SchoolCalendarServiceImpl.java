@@ -20,7 +20,11 @@ import java.util.Map;
 
 import com.google.gwt.sample.dynatable.client.SchoolCalendarService;
 import com.google.gwt.sample.dynatable.shared.vo.Person;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryResult;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
+
+import dontCare.gf.gwt.client.util.ArrayUtil;
 
 /**
  * The implemenation of the RPC service which runs on the server.
@@ -35,17 +39,23 @@ public class SchoolCalendarServiceImpl extends RemoteServiceServlet implements
 		}
 	}
 
+	public int getPersonCount() {
+		return Dao.getPersonCount();
+	}
+	
+	@SuppressWarnings("deprecation")
 	public List<Person> getPeoplesList(int startIndex, int maxCount) {
-		return Dao.getPeoplesList(startIndex, maxCount);
+		return ArrayUtil.convert(Dao.getPeoplesList(startIndex, maxCount));
 	}
 
+	@SuppressWarnings("deprecation")
 	public List<Person> getPeoplesListTest(int startIndex, int maxCount,
 			List<String> sort, Map<String, String> search) {
-		return Dao.getPeoplesListTest(startIndex, maxCount, sort, search);
+		return ArrayUtil.convert(Dao.getPeoplesListTest(startIndex, maxCount, sort, search));
 	}
 
-	public Person[] getPeoples(int startIndex, int maxCount) {
-		return Dao.getPeoples(startIndex, maxCount);
+	public OfyQueryResult<List<Person>> getPeoples(OfyQueryParameter<Person> para) {
+		return Dao.getPeoplesList(para);
 	}
 
 	/**

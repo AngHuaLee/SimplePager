@@ -14,7 +14,7 @@
 
 <module rename-to="dynatable">
 	<inherits name='com.google.gwt.user.User' />
-	<inherits name="com.google.gwt.user.theme.standard.StandardResources" />
+	<inherits name="com.google.gwt.user.theme.clean.Clean" />
 	<inherits name="com.googlecode.objectify.Objectify" />
 	<inherits name="dontCare.gf.gwt.GF" />
 	<inherits name="dontCare.gf.gae.gwtChannel.GwtChannel" />

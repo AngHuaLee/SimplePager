@@ -17,9 +17,18 @@ package com.google.gwt.sample.dynatable.client;
 
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.sample.dynatable.client.event.GetTokenEvent;
+import com.google.gwt.sample.dynatable.client.event.GetTokenHandler;
+import com.google.gwt.sample.dynatable.client.rpc.GetPersonCountTask;
 import com.google.gwt.sample.dynatable.client.ui.RootLayout;
+import com.google.gwt.sample.dynatable.shared.vo.channel.Notify;
 import com.google.gwt.user.cellview.client.SimplePager;
 import com.google.gwt.user.client.ui.RootLayoutPanel;
+
+import dontCare.gf.gae.gwtChannel.client.Channel;
+import dontCare.gf.gae.gwtChannel.client.event.MessageEvent;
+import dontCare.gf.gae.gwtChannel.client.event.MessageEvent.MessageHandler;
+import dontCare.gf.gwt.client.taskFlow.TaskAgent;
 
 /**
  * The entry point class which performs the initial loading of the DynaTable
@@ -28,13 +37,43 @@ import com.google.gwt.user.client.ui.RootLayoutPanel;
 public class DynaTable implements EntryPoint {
 	public static SimplePager.Resources pagerResource = GWT.create(SimplePager.Resources.class);
 	private RootLayout rootLayout = new RootLayout();
-	//private DynaTableMain rootLayout = new DynaTableMain();
-	//private CellTableMain rootLayout = new CellTableMain();
+	private static Channel channel;
 	
 	public void onModuleLoad() {
+		RpcCenter.addGetTokenHandler(new GetTokenHandler() {
+			@Override
+			public void onGetToken(GetTokenEvent event) {
+				buildChannel(event.getData());
+			}
+		});
 		RootLayoutPanel mainTab = RootLayoutPanel.get();
 		if (mainTab != null) {
 			mainTab.add(rootLayout);
 		}
+	}
+
+	/**
+	 * 處理 server 主動丟過來的 message，
+	 * 主要是提醒 client 要向 server update 資料。
+	 * @param token
+	 */
+	private void buildChannel(String token) {
+		channel = new Channel(token);
+		channel.addMessageHandler(new MessageHandler() {
+			@Override
+			public void onMessage(MessageEvent e) {
+				TaskAgent taskAgent = new TaskAgent();
+				Notify msg = (Notify) e.getMessage();
+				
+				switch(msg.getCode()) {
+				case Notify.PERSON_COUNT:
+					taskAgent.addTask(new GetPersonCountTask()); 
+					break;
+				}
+				
+				taskAgent.start();
+			}
+		});
+		channel.open();
 	}
 }

@@ -1,20 +1,23 @@
 package com.google.gwt.sample.dynatable.client.ui;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ChangeEvent;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.sample.dynatable.client.DynaTable;
 import com.google.gwt.sample.dynatable.client.RpcCenter;
-import com.google.gwt.sample.dynatable.client.event.GetPeoplesListTestEvent;
-import com.google.gwt.sample.dynatable.client.event.GetPeoplesListTestHandler;
-import com.google.gwt.sample.dynatable.client.rpc.GetPeoplesListTestTask;
+import com.google.gwt.sample.dynatable.client.event.GetPeoplesEvent;
+import com.google.gwt.sample.dynatable.client.event.GetPeoplesHandler;
+import com.google.gwt.sample.dynatable.client.rpc.GetPeoplesTask;
 import com.google.gwt.sample.dynatable.shared.vo.Person;
 import com.google.gwt.sample.dynatable.shared.vo.Student;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryResult;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfySearchParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfySortParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfySortType;
 import com.google.gwt.uibinder.client.UiBinder;
 import com.google.gwt.uibinder.client.UiField;
 import com.google.gwt.uibinder.client.UiHandler;
@@ -54,6 +57,10 @@ public class CellTableMain extends Composite {
 	@UiField
 	TextBox descSearch;
 	@UiField
+	TextBox phoneSearchStart;
+	@UiField
+	TextBox phoneSearchEnd;
+	@UiField
 	ListBox visibleRangeListBox;
 	@UiField
 	CellTable<Person> calendarCellTable;
@@ -66,9 +73,9 @@ public class CellTableMain extends Composite {
 			fetchData();
 		}
 	};
-	private List<Person> data;
-	private List<String> sort;
-	private Map<String, String> search;
+	private OfyQueryResult<List<Person>> data;
+	private OfySortParameter sort;
+	private List<OfySearchParameter> search;
 
 	public CellTableMain() {
 		initWidget(uiBinder.createAndBindUi(this));
@@ -77,9 +84,9 @@ public class CellTableMain extends Composite {
 	}
 
 	private void buildHandler() {
-		RpcCenter.addGetPeoplesListTestHandler(new GetPeoplesListTestHandler() {
+		RpcCenter.addGetPeoplesHandler(new GetPeoplesHandler() {
 			@Override
-			public void onGetPeoplesListTest(GetPeoplesListTestEvent event) {
+			public void onGetPeoples(GetPeoplesEvent event) {
 				data = event.getData();
 				refresh();
 			}
@@ -94,9 +101,21 @@ public class CellTableMain extends Composite {
 	}
 
 	private void buildTable() {
+		search = new ArrayList<OfySearchParameter>();
 		provider.addDataDisplay(calendarCellTable);
 		pager.setDisplay(calendarCellTable);
 
+		TextColumn<Person> iidColumn = new TextColumn<Person>() {
+			@Override
+			public String getValue(Person data) {
+				if (data == null) {
+					return "";
+				}
+				return "" + data.getIdentityId();
+			}
+		};
+		iidColumn.setDataStoreName("identityId");
+		iidColumn.setSortable(true);
 		TextColumn<Person> nameColumn = new TextColumn<Person>() {
 			@Override
 			public String getValue(Person data) {
@@ -121,6 +140,17 @@ public class CellTableMain extends Composite {
 				}
 			}
 		};
+		TextColumn<Person> phoneColumn = new TextColumn<Person>() {
+			@Override
+			public String getValue(Person data) {
+				if (data == null) {
+					return "";
+				}
+				return "" + data.getPhoneNumber();
+			}
+		};
+		phoneColumn.setDataStoreName("phoneNumber");
+		phoneColumn.setSortable(true);
 		TextColumn<Person> descriptionColumn = new TextColumn<Person>() {
 			@Override
 			public String getValue(Person data) {
@@ -140,8 +170,10 @@ public class CellTableMain extends Composite {
             }
 		};
 		calendarCellTable.addColumnSortHandler(sortHandler);
+		calendarCellTable.addColumn(iidColumn, "ID");
 		calendarCellTable.addColumn(nameColumn, "Name");
 		calendarCellTable.addColumn(typeColumn, "Type");
+		calendarCellTable.addColumn(phoneColumn, "Phone");
 		calendarCellTable.addColumn(descriptionColumn, "Desc");
 	}
 
@@ -173,45 +205,67 @@ public class CellTableMain extends Composite {
 		if (pager.getPageSize() < 1)
 			return;
 		TaskAgent ta = new TaskAgent();
-		ta.addTask(new GetPeoplesListTestTask(pager.getPageStart(), pager.getPageSize() + 1, sort, search));
+		OfyQueryParameter<Person> para = new OfyQueryParameter<Person>();
+		para.setCountAll(true);
+		para.setMaxCount(pager.getPageSize() + 1);
+		para.setStartIndex(pager.getPageStart());
+		para.addSort(sort);
+		for (OfySearchParameter osp : search) {
+			para.addSearch(osp);
+		}
+		ta.addTask(new GetPeoplesTask(para));
+//		ta.addTask(new GetPeoplesListTestTask(pager.getPageStart(), pager.getPageSize() + 1, sort, search));
 //		ta.addTask(new GetPeoplesListTask(pager.getPageStart(), pager.getPageSize() + 1));
 		ta.start();
 	}
 
 	private void updateSort() {
-		sort = new ArrayList<String>();
 		ColumnSortList csl = calendarCellTable.getColumnSortList();
 		for (int i = 0; i < csl.size(); i++) {
 			ColumnSortInfo info = csl.get(i);
 			String fieldName = info.getColumn().getDataStoreName();
 			if (fieldName != null && fieldName.length() > 0) {
 				if (info.isAscending()) {
-					sort.add(info.getColumn().getDataStoreName());
+					sort = new OfySortParameter(info.getColumn().getDataStoreName());
 				} else {
-					sort.add("-" + info.getColumn().getDataStoreName());
+					sort = new OfySortParameter(info.getColumn().getDataStoreName(), OfySortType.descending);
 				}
 			}
 		}
 	}
 
 	private void updateSearch() {
-		search = new HashMap<String, String>();
+		search = new ArrayList<OfySearchParameter>();
+		OfySearchParameter osp;
 		String tmp = nameSearch.getText().trim();
-		if (!nameSearch.getText().trim().equals("")) {
-			search.put("name", tmp);
+		if (!tmp.equals("")) {
+			osp = new OfySearchParameter();
+			osp.like("name", tmp);
+			search.add(osp);
 		}
 		tmp = descSearch.getText().trim();
-		if (!descSearch.getText().trim().equals("")) {
-			search.put("description", tmp);
+		if (!tmp.equals("")) {
+			osp = new OfySearchParameter();
+			osp.like("description", tmp);
+			search.add(osp);
+		}
+		tmp = phoneSearchStart.getText().trim();
+		String end = phoneSearchEnd.getText().trim();
+		if (!tmp.equals("") && !end.equals("")) {
+			osp = new OfySearchParameter();
+			osp.between("description", tmp, end);
+			search.add(osp);
 		}
 	}
 
 	private void refresh() {
 		if (data != null) {
-			provider.updateRowData(pager.getPageStart(), data);
-		}
-		if (data.size() <= pager.getPageSize()) {
-			provider.updateRowCount(pager.getPageStart() + data.size(), true);
+			provider.updateRowData(pager.getPageStart(), data.getResult());
+			if (data.getCount() > 0) {
+				provider.updateRowCount(data.getCount(), true);
+			} else {
+				provider.updateRowCount(pager.getPageStart() + data.getResult().size(), false);
+			}
 		}
 	}
 }

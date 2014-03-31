@@ -15,6 +15,7 @@
  */
 package com.google.gwt.sample.dynatable.shared.vo;
 
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyWhiteList;
 import com.google.gwt.user.client.rpc.IsSerializable;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -28,6 +29,10 @@ import com.googlecode.objectify.annotation.Index;
 public abstract class Person implements IsSerializable {
 	@Id
 	Long id;
+	@Index @OfyWhiteList(authorizedDomains={"gmail.com"})
+	String identityId; 
+	@Index 
+	String phoneNumber; 
 	@Index
 	String name;
 	String description = "DESC";
@@ -41,6 +46,22 @@ public abstract class Person implements IsSerializable {
 
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	public String getIdentityId() {
+		return identityId;
+	}
+
+	public void setIdentityId(String identityId) {
+		this.identityId = identityId;
+	}
+
+	public String getPhoneNumber() {
+		return phoneNumber;
+	}
+
+	public void setPhoneNumber(String phoneNumber) {
+		this.phoneNumber = phoneNumber;
 	}
 
 	public String getDescription() {

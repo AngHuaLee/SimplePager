@@ -15,6 +15,9 @@
 		<g:TextBox ui:field="nameSearch"></g:TextBox>
 		<g:Label>Desc：</g:Label>
 		<g:TextBox ui:field="descSearch"></g:TextBox>
+		<g:Label>Phone：</g:Label>
+		<g:TextBox ui:field="phoneSearchStart"></g:TextBox>
+		<g:TextBox ui:field="phoneSearchEnd"></g:TextBox>
 		<g:Button ui:field="searchButton">Search</g:Button>
 		<c:CellTable ui:field="calendarCellTable" />
 		<c:SimplePager ui:field="pager" />

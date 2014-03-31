@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.gwt.sample.dynatable.shared.vo.Person;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryParameter;
+import com.google.gwt.sample.dynatable.shared.vo.ofy.OfyQueryResult;
 import com.google.gwt.user.client.rpc.RemoteService;
 import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 
@@ -27,7 +29,8 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
  */
 @RemoteServiceRelativePath("calendar")
 public interface SchoolCalendarService extends RemoteService {
-	Person[] getPeoples(int startIndex, int visibleRange);
+	int getPersonCount();
+	OfyQueryResult<List<Person>> getPeoples(OfyQueryParameter<Person> para);
 	List<Person> getPeoplesList(int startIndex, int visibleRange);
 	List<Person> getPeoplesListTest(int startIndex, int visibleRange, List<String> sort, Map<String, String> search);
 }
